@@ -1,15 +1,14 @@
 // Argon Dashboard 2 MUI layouts
 import Dashboard from "../containers/dashboard/index";
 import Tables from "layouts/tables";
-import Billing from "layouts/billing";
-import VirtualReality from "layouts/virtual-reality";
-import RTL from "layouts/rtl";
-import Profile from "layouts/profile";
+import Profile from "../containers/profile/index";
 import SignIn from "../containers/authentication/Sign-in/index";
 import SignUp from "../containers/authentication/Sign-up/index";
 
 // Argon Dashboard 2 MUI components
 import ArgonBox from "components/ArgonBox";
+import Staff from "../containers/Staff/Users/index";
+import Customer from "containers/customer";
 
 const AdminRoutes = [
   {
@@ -38,7 +37,7 @@ const AdminRoutes = [
     icon: (
       <ArgonBox component="i" color="warning" fontSize="14px" className="ni ni-calendar-grid-58" />
     ),
-    component: <Tables />,
+    component: <Staff />,
   },
   {
     type: "route",
@@ -48,7 +47,7 @@ const AdminRoutes = [
     icon: (
       <ArgonBox component="i" color="warning" fontSize="14px" className="ni ni-calendar-grid-58" />
     ),
-    component: <Tables />,
+    component: <Customer />,
   },
   /* {
     type: "route",
@@ -58,6 +57,16 @@ const AdminRoutes = [
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
     component: <SignUp />,
   }, */
+  {
+    type: "route",
+    name: "Services",
+    key: "services",
+    route: "/services",
+    icon: (
+      <ArgonBox component="i" color="warning" fontSize="14px" className="ni ni-single-copy-04" />
+    ),
+    component: <Dashboard />,
+  },
   {
     type: "route",
     name: "Reports",

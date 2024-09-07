@@ -16,7 +16,8 @@ Coded by www.creative-tim.com
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
-import store from "reducer/Store";
+import { store, persistor } from "reducer/Store";
+import { PersistGate } from "redux-persist/integration/react";
 import { BrowserRouter } from "react-router-dom";
 import App from "App";
 
@@ -34,13 +35,14 @@ const root = createRoot(container);
 
 root.render(
   <Provider store={store}>
-
-  <BrowserRouter>
-    <ArgonControllerProvider>
-      <PerfectScrollbar>
-        <App />
-      </PerfectScrollbar>
-    </ArgonControllerProvider>
-  </BrowserRouter>
+    <PersistGate loading={null} persistor={persistor}>
+      <BrowserRouter>
+        <ArgonControllerProvider>
+          <PerfectScrollbar>
+            <App />
+          </PerfectScrollbar>
+        </ArgonControllerProvider>
+      </BrowserRouter>
+    </PersistGate>
   </Provider>
 );
