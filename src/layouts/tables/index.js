@@ -24,7 +24,7 @@ import ArgonTypography from "components/ArgonTypography";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
-import Table from "examples/Tables/Table";
+import DataTable from "examples/Tables/DataTable";
 
 // Data
 import authorsTableData from "layouts/tables/data/authorsTableData";
@@ -75,7 +75,7 @@ function Tables() {
           </ArgonBox> */}
         </Card>
       </ArgonBox>
-      <Footer />
+      {/* <Footer /> */}
     </DashboardLayout>
   );
 }

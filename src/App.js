@@ -18,7 +18,7 @@ import { useState, useEffect } from "react";
 // react-router components
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { Provider, useSelector } from "react-redux";
-import store from "reducer/Store";
+import { store } from "reducer/Store";
 
 // @mui material components
 import { ThemeProvider } from "@mui/material/styles";
@@ -62,12 +62,6 @@ export default function App() {
   } else {
     routes = UserRoutes;
   }
-  // Determine which routes to use based on role
-  //const routes = role === "USER" ? UserRoutes : AdminRoutes;
-
-  const filteredRoutes = isUserLoggedIn
-    ? routes.filter((route) => !["sign-in", "sign-up"].includes(route.key))
-    : routes;
 
   const [controller, dispatch] = useArgonController();
   const { miniSidenav, direction, layout, openConfigurator, sidenavColor, darkSidenav, darkMode } =
@@ -105,8 +99,6 @@ export default function App() {
     document.documentElement.scrollTop = 0;
     document.scrollingElement.scrollTop = 0;
   }, [pathname]);
-
-  //const filteredRoutes = routes.filter((route) => !["sign-in", "sign-up"].includes(route.key));
 
   const getRoutes = (allRoutes) =>
     allRoutes.map((route) => {
@@ -154,7 +146,7 @@ export default function App() {
             color={sidenavColor}
             brand={darkSidenav || darkMode ? brand : brandDark}
             brandName="SB Bookings"
-            routes={filteredRoutes}
+            routes={routes}
             onMouseEnter={handleOnMouseEnter}
             onMouseLeave={handleOnMouseLeave}
           />

@@ -174,11 +174,11 @@ function Configurator() {
 
         <Divider />
 
-        <ArgonBox display="flex" justifyContent="space-between" lineHeight={1}>
+        {/* <ArgonBox display="flex" justifyContent="space-between" lineHeight={1}>
           <ArgonTypography variant="h6">Light / Dark</ArgonTypography>
 
           <Switch checked={darkMode} onChange={handleDarkMode} />
-        </ArgonBox>
+        </ArgonBox> */}
       </ArgonBox>
     </ConfiguratorRoot>
   );

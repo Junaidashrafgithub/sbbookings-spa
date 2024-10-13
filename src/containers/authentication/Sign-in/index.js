@@ -70,7 +70,6 @@ function SignIn() {
     password: "",
   });
   const [controller, _dispatch] = useArgonController();
-  const [rememberMe, setRememberMe] = useState(false);
 
   const sleep = (ms) =>
     new Promise((resolve) => {
@@ -86,6 +85,7 @@ function SignIn() {
   };
 
   const handleSubmit = async (values, actions) => {
+    debugger;
     await sleep(1000);
     actions.setSubmitting(false);
     values.email = values.email.toLowerCase();
@@ -97,12 +97,15 @@ function SignIn() {
         password: inputValues.password,
       };
       let res = await dbops.signIn(data);
+
       if (res.message === "SUCCESS") {
         let _user_Info = userInfo;
         _user_Info.user_id = res.data.id;
-        _user_Info.name = res.data.name_first;
+        _user_Info.first_name = res.data.name_first;
+        _user_Info.last_name = res.data.name_last;
         _user_Info.email = res.data.email;
         _user_Info.role = res.data.role;
+        _user_Info.address = res.data.address;
         _user_Info.isUserLoggedIn = true;
         dispatch(setUserInfo(_user_Info));
 
@@ -117,7 +120,7 @@ function SignIn() {
       description=""
       illustration={{
         image: bgImage,
-        title: "Argon Dashboard",
+        title: "SB Bookings",
         description:
           "The more effortless the writing looks, the more effort the writer actually put into the process.",
       }}
@@ -186,17 +189,6 @@ function SignIn() {
             );
           }}
         </Formik>
-        {/*  <ArgonBox display="flex" alignItems="center">
-          <Switch checked={rememberMe} onChange={handleSetRememberMe} />
-          <ArgonTypography
-            variant="button"
-            fontWeight="regular"
-            onClick={handleSetRememberMe}
-            sx={{ cursor: "pointer", userSelect: "none" }}
-          >
-            &nbsp;&nbsp;Remember me
-          </ArgonTypography>
-        </ArgonBox> */}
       </ArgonBox>
     </IllustrationLayout>
   );

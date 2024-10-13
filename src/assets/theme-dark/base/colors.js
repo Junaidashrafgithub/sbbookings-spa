@@ -56,8 +56,8 @@ const colors = {
   },
 
   info: {
-    main: "#11cdef",
-    focus: "#11cdef",
+    main: "#344767",
+    focus: "#344767",
   },
 
   success: {
@@ -110,7 +110,7 @@ const colors = {
 
     info: {
       main: "#1171ef",
-      state: "#11cdef",
+      state: "#344767",
     },
 
     success: {
@@ -294,7 +294,7 @@ const colors = {
   },
 
   inputColors: {
-    borderColor: { main: "#f0f2f566", focus: "#11cdef" },
+    borderColor: { main: "#f0f2f566", focus: "#344767" },
     error: "#f5365c",
     success: "#2dce89",
   },

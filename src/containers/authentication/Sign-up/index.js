@@ -20,6 +20,8 @@ import { Link } from "react-router-dom";
 import Card from "@mui/material/Card";
 import Checkbox from "@mui/material/Checkbox";
 
+import { useState } from "react";
+
 // Argon Dashboard 2 MUI components
 import ArgonBox from "components/ArgonBox";
 import ArgonTypography from "components/ArgonTypography";
@@ -36,6 +38,49 @@ const bgImage =
   "https://raw.githubusercontent.com/creativetimofficial/public-assets/master/argon-dashboard-pro/assets/img/signup-cover.jpg";
 
 function Cover() {
+  const [inputValues, setInputValues] = useState({
+    email: "",
+    password: "",
+  });
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setInputValues({
+      ...inputValues,
+      [name]: value,
+    });
+  };
+
+  const handleSubmit = async (values, actions) => {
+    await sleep(1000);
+    actions.setSubmitting(false);
+    values.email = values.email.toLowerCase();
+
+    try {
+      let dbops = new dbOps();
+      let data = {
+        email: inputValues.email,
+        password: inputValues.password,
+      };
+      let res = await dbops.signIn(data);
+
+      if (res.message === "SUCCESS") {
+        let _user_Info = userInfo;
+        _user_Info.user_id = res.data.id;
+        _user_Info.first_name = res.data.name_first;
+        _user_Info.last_name = res.data.name_last;
+        _user_Info.email = res.data.email;
+        _user_Info.role = res.data.role;
+        _user_Info.address = res.data.address;
+        _user_Info.isUserLoggedIn = true;
+        dispatch(setUserInfo(_user_Info));
+
+        navigate("/dashboard");
+      }
+    } catch (error) {}
+  };
+
+  
   return (
     <CoverLayout
       title="Welcome!"
@@ -45,25 +90,15 @@ function Cover() {
       button={{ color: "dark", variant: "gradient" }}
     >
       <Card>
-        
-        {/*  <ArgonBox mb={2}>
-          <Socials />
-        </ArgonBox> */}
-        {/* <ArgonBox px={12}>
-          <Separator />
-        </ArgonBox> */}
-        <ArgonBox pt={2} pb={3} px={3}>
+        <ArgonBox mt={3} pt={2} pb={3} px={3}>
           <ArgonBox component="form" role="form">
-           {/*  <ArgonBox mb={2}>
-              <ArgonInput placeholder="Name" />
-            </ArgonBox> */}
             <ArgonBox mb={2}>
               <ArgonInput type="email" placeholder="Email" />
             </ArgonBox>
             <ArgonBox mb={2}>
               <ArgonInput type="password" placeholder="Password" />
             </ArgonBox>
-           {/*  <ArgonBox display="flex" alignItems="center">
+            <ArgonBox display="flex" alignItems="center">
               <Checkbox defaultChecked />
               <ArgonTypography
                 variant="button"
@@ -81,7 +116,7 @@ function Cover() {
               >
                 Terms and Conditions
               </ArgonTypography>
-            </ArgonBox> */}
+            </ArgonBox>
             <ArgonBox mt={4} mb={1}>
               <ArgonButton variant="gradient" color="dark" fullWidth>
                 sign up

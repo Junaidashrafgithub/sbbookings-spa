@@ -4,12 +4,16 @@ import Tables from "layouts/tables";
 import Billing from "layouts/billing";
 import VirtualReality from "layouts/virtual-reality";
 import RTL from "layouts/rtl";
-import Profile from "layouts/profile";
+import Profile from "../containers/profile/index";
 import SignIn from "../containers/authentication/Sign-in/index";
+import Staff from "../containers/Staff/Users/index";
 import SignUp from "../containers/authentication/Sign-up/index";
+import Customer from "containers/customer";
 
 // Argon Dashboard 2 MUI components
 import ArgonBox from "components/ArgonBox";
+import Services from "containers/services";
+import Reports from "containers/reports";
 
 const UserRoutes = [
   {
@@ -22,14 +26,14 @@ const UserRoutes = [
     ),
     component: <SignIn />,
   },
-  /*  {
+  {
     type: "route",
     name: "Sign Up",
     key: "sign-up",
     route: "/authentication/sign-up",
     icon: <ArgonBox component="i" color="info" fontSize="14px" className="ni ni-collection" />,
     component: <SignUp />,
-  }, */
+  },
   {
     type: "route",
     name: "Dashboard",
@@ -46,7 +50,7 @@ const UserRoutes = [
     icon: (
       <ArgonBox component="i" color="warning" fontSize="14px" className="ni ni-calendar-grid-58" />
     ),
-    component: <Tables />,
+    component: <Staff />,
   },
   {
     type: "route",
@@ -56,7 +60,17 @@ const UserRoutes = [
     icon: (
       <ArgonBox component="i" color="warning" fontSize="14px" className="ni ni-calendar-grid-58" />
     ),
-    component: <Tables />,
+    component: <Customer />,
+  },
+  {
+    type: "route",
+    name: "Services",
+    key: "services",
+    route: "/services",
+    icon: (
+      <ArgonBox component="i" color="warning" fontSize="14px" className="ni ni-single-copy-04" />
+    ),
+    component: <Services />,
   },
   {
     type: "route",
@@ -66,7 +80,7 @@ const UserRoutes = [
     icon: (
       <ArgonBox component="i" color="warning" fontSize="14px" className="ni ni-single-copy-04" />
     ),
-    component: <SignIn />,
+    component: <Reports />,
   },
   { type: "title", title: "Account Pages", key: "account-pages" },
   {
