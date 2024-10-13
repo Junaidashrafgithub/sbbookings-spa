@@ -4,10 +4,11 @@ import Swal from "sweetalert2";
 export const showDeleteAlert = async (onConfirm, onCancel) => {
   const newSwal = Swal.mixin({
     customClass: {
+      popup: "custom-swal-popup",
       confirmButton: "button button-success",
       cancelButton: "button button-error",
     },
-    buttonsStyling: false,
+    buttonsStyling: true,
   });
 
   try {
@@ -30,14 +31,16 @@ export const showDeleteAlert = async (onConfirm, onCancel) => {
   }
 };
 export const showSuccessMessage = (operation) => {
+  debugger;
   Swal.fire({
     icon: "success",
-    title: `Successfully ${operation}!`,
-    text: `The record has been ${operation.toLowerCase()} successfully.`,
+    title: `Success!`,
+    //text: `The record has been ${operation.toLowerCase()} successfully.`,
+    text: operation,
     confirmButtonText: "OK",
   });
 };
 
 export const showCanceledMessage = (operation) => {
-  Swal.fire("Cancelled", "Your record is safe.", "error");
+  Swal.fire("Cancelled", "", "error");
 };

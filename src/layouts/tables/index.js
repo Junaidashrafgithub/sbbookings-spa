@@ -75,7 +75,7 @@ function Tables() {
           </ArgonBox> */}
         </Card>
       </ArgonBox>
-      <Footer />
+      {/* <Footer /> */}
     </DashboardLayout>
   );
 }

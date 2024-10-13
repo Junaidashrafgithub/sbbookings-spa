@@ -122,6 +122,13 @@ const form = {
       placeholder: "eg. GOT",
       errorMsg: "Group is required.",
     },
+    department: {
+      name: "department",
+      label: "Department",
+      type: "text",
+      placeholder: "eg. surgery",
+      errorMsg: "Department is required.",
+    },
     // isActive: {
     //   name: "username",
     //   label: "user name",

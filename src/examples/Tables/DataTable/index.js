@@ -20,8 +20,9 @@ function DataTable({
   pagination,
   table,
   isSorted, //staff screen
-  showNewUserButton,
+  showNewtaffButton,
   handleFormOpen,
+  label
 }) {
   const defaultValue = entriesPerPage.defaultValue ? entriesPerPage.defaultValue : 10;
   const entries = entriesPerPage.entries ? entriesPerPage.entries : [5, 10, 15, 20, 25];
@@ -111,11 +112,11 @@ function DataTable({
     <TableContainer sx={{ boxShadow: "none", overflowX: "auto" }}>
       {entriesPerPage || canSearch ? (
         <ArgonBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
-          {showNewUserButton && (
+          {showNewtaffButton && (
             <ArgonBox>
               <ArgonBox display="inline-flex" justifyContent="space-between" alignItems="center">
-                <ArgonButton sx={{ backgroundColor: "#11cdef" }} onClick={handleFormOpen}>
-                  Add New user
+                <ArgonButton sx={{ backgroundColor: "#344767", color: "#fff" }} onClick={handleFormOpen}>
+                 {label}
                 </ArgonButton>
               </ArgonBox>
             </ArgonBox>
@@ -137,7 +138,7 @@ function DataTable({
 
       <ArgonBox style={{ overflowX: "auto" }}>
         <Table {...getTableProps()}>
-          <ArgonBox component="thead" sx={{ backgroundColor: "#11cdef" }}>
+          <ArgonBox component="thead" sx={{ backgroundColor: "#344767" }}>
             {headerGroups.map((headerGroup, key) => (
               <>
                 <TableRow key={key} {...headerGroup.getHeaderGroupProps()}>
@@ -256,7 +257,8 @@ DataTable.propTypes = {
   noEndBorder: PropTypes.bool,
   showTotalEntries: PropTypes.bool,
   isSorted: PropTypes.bool,
-  showNewUserButton: PropTypes.bool,
+  showNewtaffButton: PropTypes.bool,
+  label: PropTypes.string,
   handleFormOpen: PropTypes.func,
   table: PropTypes.shape({
     columns: PropTypes.array.isRequired,

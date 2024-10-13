@@ -8,11 +8,10 @@ import form from "schemas/NewUser/form";
 import validations from "schemas/NewUser/validations";
 import Address from "containers/Staff/Users/address";
 import ArgonButton from "components/ArgonButton";
+import LoadingSpinner from "common/spinner";
 
 //utills
 import { showDeleteAlert, showSuccessMessage, showCanceledMessage } from "util/alertUtil";
-
-import useFetch from "hooks/useFetch";
 
 // @mui material components
 import { Grid, Card, Icon, Stepper, Step, StepLabel } from "@mui/material";
@@ -22,7 +21,7 @@ import { Formik, Form } from "formik";
 import dbOps from "../../../libs/dbops";
 
 function getSteps() {
-  return ["Staff Personal Info", "Staff Login Info"];
+  return ["Personal Info", "Login Info"];
 }
 
 function getStepContent(stepIndex, formData) {
@@ -64,6 +63,7 @@ export default function Staff() {
   const isLastStep = activeStep === steps.length - 1;
   const [formOpen, setFormOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const [dataTableData, setDataTableData] = useState({
     columns: [
@@ -97,15 +97,9 @@ export default function Staff() {
     rows: [],
   });
 
-  //const { data: users, loading: usersLoading, error: usersError } = useFetch(getAllStaff);
-
   useEffect(() => {
     getAllStaff();
   }, []);
-
-  /*  useEffect(() => {
-    if (users) setDataTableData((prevData) => ({ ...prevData, rows: users }));
-  }, [users]); */
 
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -144,43 +138,38 @@ export default function Staff() {
   };
 
   const handleEdit = async (rowData) => {
-    const result = await editUser(rowData.row.original.uid);
+    let dbops = new dbOps();
+    const data = {
+      email: rowData.row.original.email,
+    };
+
+    const result = await dbops.getStaff(data);
 
     const user = rowData.row.original;
     setSelectedUser(user);
     setInitialValues({
-      firstName: result.first_Name,
-      lastName: result.last_Name,
-      email: result.email,
-      mobile: result?.mobile,
-      address1: result.address1,
-      address2: result.address2,
-      city: result.city,
+      firstName: result.data.name_first,
+      lastName: result.data.name_last,
+      email: result.data.email,
+      mobile: result?.data.mobile,
+      address1: result.data.address1,
+      address2: result.data.address2,
+      city: result.data.city,
       state: {
-        value: result.state,
-        label: result.state,
+        value: result.data.state,
+        label: result.data.state,
       },
-      zip: result.zip,
-      username: result.email,
+      zip: result.data.zip,
+      username: result.data.email,
       password: "",
       confirmPassword: "",
-      role: {
-        value: result.role_ID,
-        label: result.role_Name,
-      },
-      groupType: {
-        value: result.group_type,
-        label: result.group_type_desc,
-      },
     });
     setFormOpen(true);
   };
 
   const submitForm = async (values, actions) => {
-    /* console.log("values: ", values);
-    debugger; */
     await sleep(1000);
-
+    setLoading(true);
     try {
       const obj = {
         name_first: values.firstName,
@@ -196,19 +185,18 @@ export default function Staff() {
         password: values.password,
       };
       if (selectedUser) {
-        await createNewUser({
-          ...obj,
-          User_ID: selectedUser.uid,
-          operation: "EditUser",
-        });
-        showSuccessMessage("udpated");
+        let dbpos = new dbOps();
+        let res = await dbpos.editStaff(obj);
+        debugger;
+        if (res.message === "SUCCESS") showSuccessMessage("User Updated Successfully");
       } else {
         let dbpos = new dbOps();
         await dbpos.createNewStaff(obj);
-        showSuccessMessage("created");
+        showSuccessMessage("User Created Successfully.");
       }
       actions.setSubmitting(false);
       actions.resetForm();
+      setLoading(false);
       setActiveStep(0);
       setFormOpen(!formOpen);
     } catch (error) {
@@ -228,13 +216,16 @@ export default function Staff() {
   };
 
   const handleDelete = async (rowData) => {
-    if (rowData) {
+    const data = { email: rowData.row.original.email };
+    if (data) {
       await showDeleteAlert(
         async () => {
           try {
-            const response = await deleteUser(rowData);
-            showSuccessMessage("Deleted");
-            //window.location.reload();
+            let dbops = new dbOps();
+            const res = await dbops.deleteStaff(data);
+            if (res.message === "SUCCESS") {
+              showSuccessMessage("Deleted Successfully");
+            }
           } catch (error) {
             console.error("Error deleting item:", error);
           }
@@ -247,6 +238,7 @@ export default function Staff() {
   };
 
   const getAllStaff = async () => {
+    setLoading(true);
     const data = {};
     let dbops = new dbOps();
     let res = await dbops.getAllStaff(data);
@@ -262,12 +254,14 @@ export default function Staff() {
         rows: mappedRows,
       }));
     }
+    setLoading(false);
   };
 
   return (
     <DashboardLayout>
       <DashboardNavbar />
       <ArgonBox py={3} mb={20}>
+        {/* <LoadingSpinner loading={loading} /> */}
         <Grid container justifyContent="center" sx={{ height: "100%", minWidth: "100%" }}>
           {!formOpen ? (
             <Card
@@ -284,8 +278,9 @@ export default function Staff() {
               <DataTable
                 table={dataTableData}
                 canSearch
-                showNewUserButton={true}
+                showNewtaffButton={true}
                 handleFormOpen={handleFormOpen}
+                label="New Staff"
               />
             </Card>
           ) : (
@@ -326,6 +321,7 @@ export default function Staff() {
                             width="100%"
                             display="flex"
                             justifyContent="space-between"
+                            marginTop="1.5rem"
                           >
                             {activeStep === 0 ? (
                               <ArgonBox />

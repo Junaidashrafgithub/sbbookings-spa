@@ -301,6 +301,15 @@ const UserData = {
     { value: 2020, label: 2020 },
     { value: 2021, label: 2021 },
   ],
+  department: [
+    { id: "1", label: "Surgery" },
+    { id: "2", label: "Therapy" },
+    { id: "3", label: "ENT" },
+  ],
+  isGroupOptions: [
+    { value: "yes", label: "Yes" },
+    { value: "no", label: "No" },
+  ],
 };
 
 export default UserData;

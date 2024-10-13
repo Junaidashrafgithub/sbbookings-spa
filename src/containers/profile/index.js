@@ -42,18 +42,6 @@ import Header from "./Header";
 const bgImage =
   "https://raw.githubusercontent.com/creativetimofficial/public-assets/master/argon-dashboard-pro/assets/img/profile-layout-header.jpg";
 
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 400,
-  bgcolor: "background.paper",
-  border: "2px solid #000",
-  boxShadow: 24,
-  p: 4,
-};
-
 function Profile() {
   debugger;
   const navigate = useNavigate();
@@ -160,48 +148,54 @@ function Profile() {
           alignItems: "center",
           maxWidth: { sm: "100%", md: "100%", lg: "70%" },
           padding: 5,
+          border: "3px solid #344767",
         }}
       >
         <ArgonBox>
           <ArgonBox sx={{ ml: 5, mt: 5, display: "flex", justifyContent: "space-between" }}>
             <ArgonTypography variant="h4">Personel Details</ArgonTypography>
-            <ArgonButton sx={{ backgroundColor: "primary.main" }} onClick={handleOpenModel}>
+            <ArgonButton
+              sx={{ backgroundColor: "#344767", color: "#fff" }}
+              onClick={handleOpenModel}
+            >
               Change Password
             </ArgonButton>
           </ArgonBox>
 
-          <Grid container spacing={2} sx={{ padding: 10 }}>
-            <Grid item xs={12} sm={6}>
-              <Typography sx={{ fontSize: "0.875rem" }}>First Name:</Typography>
-              <ArgonInput
-                disabled
-                label="First Name"
-                variant="outlined"
-                value={userInfo.name_first}
-              />
+          <Card style={{ marginTop: "30px", backgroundColor: "whitesmoke" }}>
+            <Grid container spacing={2} sx={{ padding: 10 }}>
+              <Grid item xs={12} sm={6}>
+                <Typography sx={{ fontSize: "0.875rem" }}>First Name:</Typography>
+                <ArgonInput
+                  disabled
+                  label="First Name"
+                  variant="outlined"
+                  value={userInfo.name_first}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Typography sx={{ fontSize: "0.875rem" }}>Last Name:</Typography>
+                <ArgonInput
+                  disabled
+                  label="Last Name"
+                  variant="outlined"
+                  value={userInfo.name_last}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Typography sx={{ fontSize: "0.875rem" }}>Email:</Typography>
+                <ArgonInput disabled label="Email" variant="outlined" value={userInfo.email} />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Typography sx={{ fontSize: "0.875rem" }}>Address:</Typography>
+                <ArgonInput disabled label="Address" variant="outlined" value={userInfo.address} />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Typography sx={{ fontSize: "0.875rem" }}>Role:</Typography>
+                <ArgonInput disabled label="Address" variant="contained" value={userInfo.role} />
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <Typography sx={{ fontSize: "0.875rem" }}>Last Name:</Typography>
-              <ArgonInput
-                disabled
-                label="Last Name"
-                variant="outlined"
-                value={userInfo.name_last}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Typography sx={{ fontSize: "0.875rem" }}>Email:</Typography>
-              <ArgonInput disabled label="Email" variant="outlined" value={userInfo.email} />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Typography sx={{ fontSize: "0.875rem" }}>Address:</Typography>
-              <ArgonInput disabled label="Address" variant="outlined" value={userInfo.address} />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Typography sx={{ fontSize: "0.875rem" }}>Role:</Typography>
-              <ArgonInput disabled label="Address" variant="contained" value={userInfo.role} />
-            </Grid>
-          </Grid>
+          </Card>
 
           {openModel && (
             <Card>
@@ -219,16 +213,28 @@ function Profile() {
                 }}
               >
                 <Fade in={open}>
-                  <ArgonBox sx={style}>
+                  <ArgonBox
+                    sx={{
+                      position: "absolute",
+                      top: "50%",
+                      left: "50%",
+                      transform: "translate(-50%, -50%)",
+                      width: 400,
+                      bgcolor: "background.paper",
+                      boxShadow: 24,
+                      borderRadius: "20px",
+                      p: 4,
+                    }}
+                  >
                     <ArgonBox sx={{ marginBottom: 5 }}>
-                      <Typography id="title" variant="h6">
+                      <ArgonTypography id="title" variant="h6">
                         Change Password
-                      </Typography>
+                      </ArgonTypography>
                     </ArgonBox>
 
                     <Grid container spacing={2}>
                       <Grid item xs={12} sm={12}>
-                        <Typography sx={{ fontSize: "0.875rem" }}>Your Email:</Typography>
+                        <ArgonTypography sx={{ fontSize: "0.875rem" }}>Your Email:</ArgonTypography>
                         <ArgonInput
                           disabled
                           label="First Name"
@@ -237,7 +243,9 @@ function Profile() {
                         />
                       </Grid>
                       <Grid item xs={12} sm={12}>
-                        <Typography sx={{ fontSize: "0.875rem" }}>New Password:</Typography>
+                        <ArgonTypography sx={{ fontSize: "0.875rem" }}>
+                          New Password:
+                        </ArgonTypography>
                         <ArgonInput
                           type="password"
                           label="Last Name"
@@ -246,7 +254,9 @@ function Profile() {
                         />
                       </Grid>
                       <Grid item xs={12} sm={12}>
-                        <Typography sx={{ fontSize: "0.875rem" }}>Confirm Password:</Typography>
+                        <ArgonTypography sx={{ fontSize: "0.875rem" }}>
+                          Confirm Password:
+                        </ArgonTypography>
                         <ArgonInput
                           type="password"
                           label="Email"
@@ -261,9 +271,9 @@ function Profile() {
                           }}
                         />
                         {!isMatch && confirmPassword !== "" && (
-                          <Typography sx={{ color: "red", fontSize: "0.75rem" }}>
+                          <ArgonTypography sx={{ color: "red", fontSize: "0.75rem" }}>
                             Passwords do not match
-                          </Typography>
+                          </ArgonTypography>
                         )}
                       </Grid>
                     </Grid>

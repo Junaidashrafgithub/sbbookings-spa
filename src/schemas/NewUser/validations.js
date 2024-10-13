@@ -26,6 +26,7 @@ const {
     city,
     state,
     zip,
+    department,
     username,
     password,
     confirmPassword,

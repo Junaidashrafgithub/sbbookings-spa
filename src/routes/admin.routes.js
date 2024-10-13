@@ -8,7 +8,9 @@ import SignUp from "../containers/authentication/Sign-up/index";
 // Argon Dashboard 2 MUI components
 import ArgonBox from "components/ArgonBox";
 import Staff from "../containers/Staff/Users/index";
-import Customer from "containers/customer";
+import Customer from "../containers/customer/index";
+import Reports from "../containers/reports/index";
+import Services from "containers/services";
 
 const AdminRoutes = [
   {
@@ -65,7 +67,7 @@ const AdminRoutes = [
     icon: (
       <ArgonBox component="i" color="warning" fontSize="14px" className="ni ni-single-copy-04" />
     ),
-    component: <Dashboard />,
+    component: <Services />,
   },
   {
     type: "route",
@@ -75,7 +77,7 @@ const AdminRoutes = [
     icon: (
       <ArgonBox component="i" color="warning" fontSize="14px" className="ni ni-single-copy-04" />
     ),
-    component: <Dashboard />,
+    component: <Reports />,
   },
   { type: "title", title: "Account Pages", key: "account-pages" },
   {
