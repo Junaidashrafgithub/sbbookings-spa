@@ -8,7 +8,7 @@ const errorMsgAdmin = "Please report to your admin if this continues.",
 
 export default class dbOps {
   async postRequest(url, data = {}) {
-    debugger;
+    // debugger;
     try {
       let URL = state.URL + url;
       let token = state.userInfo.token;
@@ -179,5 +179,17 @@ export default class dbOps {
       "could not get appointment",
       errorMsgAdmin
     );
+  }
+
+  async getAllServices(data) {
+    return await this.postRequest("services/get-all-services", data);
+  }
+
+  async addNewService(data) {
+    return await this.postRequest("services/add-service", data);
+  }
+
+  async deleteService(data) {
+    return await this.postRequest("services/delete-service", data);
   }
 }
