@@ -182,14 +182,14 @@ export default class dbOps {
   }
 
   async getAllServices(data) {
-    return await this.postRequest("services/get-all-services", data);
+    return await this.postRequest("service/get-all-services", data);
   }
 
   async addNewService(data) {
-    return await this.postRequest("services/add-service", data);
+    return await this.postRequest("service/add-service", data);
   }
 
   async deleteService(data) {
-    return await this.postRequest("services/delete-service", data);
+    return await this.postRequest("service/delete-service", data);
   }
 }
