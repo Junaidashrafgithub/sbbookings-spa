@@ -19,15 +19,13 @@ import dbOps from "libs/dbops";
 import { showDeleteAlert, showSuccessMessage, showCanceledMessage } from "util/alertUtil";
 
 function getSteps() {
-  return ["Service Info", "Save"];
+  return ["Service Info"];
 }
 
 function getStepContent(stepIndex, formData) {
   switch (stepIndex) {
     case 0:
       return <ServiceInfo formData={formData} />;
-    //case 1:
-    //return <Address formData={formData} />;
     default:
       return null;
   }
@@ -48,28 +46,14 @@ export default function Services() {
 
   const [dataTableData, setDataTableData] = useState({
     columns: [
-      { Header: "#", accessor: "id" }, // Name of the service
-      { Header: "Name", accessor: "name" }, // Name of the service
+      { Header: "#", accessor: "id" },
+      { Header: "Name", accessor: "name" },
       {
         Header: "Action",
         accessor: "action",
         align: "center",
         Cell: (props) => (
           <ArgonBox style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            {/* <Icon
-              fontSize="medium"
-              style={{ display: "inline-block" }}
-              onClick={() => handleEdit(props)}
-            >
-              edit
-            </Icon>
-            <Icon
-              fontSize="medium"
-              style={{ display: "inline-block" }}
-              onClick={() => handlePatientHistory(props)}
-            >
-              info
-            </Icon> */}
             <Icon
               fontSize="medium"
               style={{ display: "inline-block" }}
@@ -100,6 +84,7 @@ export default function Services() {
   };
 
   const handleCancel = (resetForm) => {
+    debugger;
     setActiveStep(0);
     setFormOpen(!formOpen);
     setInitialValues({
@@ -107,88 +92,42 @@ export default function Services() {
     });
   };
 
-  const handleBack = () => {
-    setActiveStep(activeStep - 1);
+  const handleSubmit = async (values, actions) => {
+    await sleep(1000);
+    setLoading(true);
+    try {
+      const obj = {
+        name: values.name,
+      };
+      let dbpos = new dbOps();
+      const res = await dbpos.addNewService(obj);
+      if (res.message === "SUCCESS") {
+        showSuccessMessage("New Service Created Successfully!");
+      }
+      actions.setSubmitting(false);
+      actions.resetForm();
+      setLoading(false);
+      setActiveStep(0);
+      setFormOpen(!formOpen);
+      getAllServices();
+    } catch (error) {
+      console.error("Error adding new service:", error);
+      actions.setSubmitting(false);
+    }
   };
-
-  const handleEdit = async (rowData) => {
-    debugger;
-    let dbops = new dbOps();
-    const data = {
-      id: rowData.row.original.id,
-    };
-
-    const result = await dbops.getService(data);
-
-    // const user = rowData.row.original;
-    // setSelectedUser(user);
-    setInitialValues({
-      name: result.data.name,
-    });
-    setFormOpen(true);
-  };
-
-  // const submitForm = async (values, actions) => {
-  //     await sleep(1000);
-  //     setLoading(true);
-  //     try {
-  //       const obj = {
-  //         name: values.name
-  //       };
-  //       if (selectedUser) {
-  //         let dbpos = new dbOps();
-  //         await dbpos.editPatient(obj);
-  //         showSuccessMessage("User Updated Successfully!");
-  //       } else {
-  //         let dbpos = new dbOps();
-  //         await dbpos.addNewPatient(obj);
-  //         showSuccessMessage("New User Created Successfully");
-  //       }
-  //       actions.setSubmitting(false);
-  //       actions.resetForm();
-  //       setLoading(false);
-  //       setActiveStep(0);
-  //       setFormOpen(!formOpen);
-  //     } catch (error) {
-  //       console.error("Error adding new user:", error);
-  //       actions.setSubmitting(false);
-  //     }
-  //   };
-
-  // const handleSubmit = async (values, actions) => {
-  //   if (isLastStep) {
-  //     try {
-  //       let dbops = new dbOps();
-  //       const result = await dbops.addService(values); // Assuming addService is a function that adds a new service to the database
-  //       actions.resetForm();
-  //       // Optionally, you can show a success message or redirect the user
-  //       alert('Service added successfully!');
-  //     } catch (error) {
-  //       console.error('Error adding service:', error);
-  //       // Optionally, you can show an error message to the user
-  //       alert('Failed to add service. Please try again.');
-  //     } finally {
-  //       actions.setSubmitting(false);
-  //     }
-  //   } else {
-  //     setActiveStep(activeStep + 1);
-  //     actions.setTouched({});
-  //     actions.setSubmitting(false);
-  //   }
-  // };
 
   const handleDelete = async (rowData) => {
-    debugger;
-    const data = { email: rowData.row.original.id };
+    // debugger;
+    const data = { id: rowData.row.original.id };
     if (data) {
       await showDeleteAlert(
         async () => {
-          debugger;
           try {
             let dbops = new dbOps();
-            const res = await dbops.deletePatient(data);
+            const res = await dbops.deleteService(data);
             if (res.message === "SUCCESS") {
               showSuccessMessage("Deleted Successfully!");
+              getAllServices();
             }
           } catch (error) {
             console.error("Error deleting patient:", error);
@@ -205,22 +144,32 @@ export default function Services() {
     setLoading(true);
     const data = {};
     let dbops = new dbOps();
-    let res = await dbops.getAllServices(data);
-    // console.log(res);
-    // debugger;
-    if (res.message === "SUCCESS") {
-      const mappedRows = res.data.map((service) => ({
-        id: service.id,
-        name: service.name,
-      }));
 
-      setDataTableData((prevState) => ({
-        ...prevState,
-        rows: mappedRows,
-      }));
+    try {
+      let res = await dbops.getAllServices(data);
+
+      if (res?.message === "SUCCESS") {
+        const mappedRows = (res.data || []).map((service) => ({
+          id: service.id,
+          name: service.name,
+        }));
+
+        setDataTableData((prevState) => ({
+          ...prevState,
+          rows: mappedRows,
+        }));
+      } else {
+        console.warn("No data found.");
+        setDataTableData((prevState) => ({
+          ...prevState,
+          rows: [],
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching services:", error);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
   return (
     <DashboardLayout>
@@ -293,10 +242,9 @@ export default function Services() {
                               <ArgonBox style={{ display: "flex", alignItems: "flex-end", gap: 5 }}>
                                 <ArgonButton
                                   disabled={isSubmitting}
-                                  type="submit"
                                   variant="gradient"
                                   color="light"
-                                  onSubmit={handleCancel}
+                                  onClick={handleCancel}
                                 >
                                   Cancel
                                 </ArgonButton>
