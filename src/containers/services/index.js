@@ -56,7 +56,7 @@ export default function Services() {
         align: "center",
         Cell: (props) => (
           <ArgonBox style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <Icon
+            {/* <Icon
               fontSize="medium"
               style={{ display: "inline-block" }}
               onClick={() => handleEdit(props)}
@@ -69,7 +69,7 @@ export default function Services() {
               onClick={() => handlePatientHistory(props)}
             >
               info
-            </Icon>
+            </Icon> */}
             <Icon
               fontSize="medium"
               style={{ display: "inline-block" }}
@@ -155,17 +155,30 @@ export default function Services() {
   //     }
   //   };
 
-  const handleSubmit = (values, actions) => {
-    // if (isLastStep) {
-    // submitForm(values, actions);
-    //} else {
-    // setActiveStep(activeStep + 1);
-    //actions.setTouched({});
-    //actions.setSubmitting(false);
-    // }
-  };
+  // const handleSubmit = async (values, actions) => {
+  //   if (isLastStep) {
+  //     try {
+  //       let dbops = new dbOps();
+  //       const result = await dbops.addService(values); // Assuming addService is a function that adds a new service to the database
+  //       actions.resetForm();
+  //       // Optionally, you can show a success message or redirect the user
+  //       alert('Service added successfully!');
+  //     } catch (error) {
+  //       console.error('Error adding service:', error);
+  //       // Optionally, you can show an error message to the user
+  //       alert('Failed to add service. Please try again.');
+  //     } finally {
+  //       actions.setSubmitting(false);
+  //     }
+  //   } else {
+  //     setActiveStep(activeStep + 1);
+  //     actions.setTouched({});
+  //     actions.setSubmitting(false);
+  //   }
+  // };
 
   const handleDelete = async (rowData) => {
+    debugger;
     const data = { email: rowData.row.original.id };
     if (data) {
       await showDeleteAlert(

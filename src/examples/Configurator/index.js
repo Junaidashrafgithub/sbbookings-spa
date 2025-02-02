@@ -173,7 +173,7 @@ function Configurator() {
         </ArgonBox>
 
         <Divider />
-
+``
         {/* <ArgonBox display="flex" justifyContent="space-between" lineHeight={1}>
           <ArgonTypography variant="h6">Light / Dark</ArgonTypography>
 
