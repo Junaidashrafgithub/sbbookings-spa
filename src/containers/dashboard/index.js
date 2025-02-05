@@ -72,6 +72,7 @@ function Default() {
     value: "",
     label: "",
   });
+  const [departmentOptions, setDepartmentOptions] = useState([]);
   const [department, setDepartment] = useState("");
   const [startDate, setStartDate] = useState("");
   const [startTime, setStartTime] = useState("");
@@ -117,6 +118,9 @@ function Default() {
       label: "",
     });
     setOpenModal(!openModal);
+    if (!openModal) {
+      getAllServices();
+    }
   };
 
   const handleShowMore = () => {
@@ -269,10 +273,37 @@ function Default() {
     }
   };
 
+  const getAllServices = async () => {
+    const data = {};
+    let dbops = new dbOps();
+
+    try {
+      let res = await dbops.getAllServices(data);
+
+      if (res?.message === "SUCCESS") {
+        const services = (res.data || []).map((service) => ({
+          id: service.id,
+          label: service.name,
+        }));
+
+        setDepartmentOptions(services);
+      } else {
+        console.warn("No data found.");
+        setDataTableData((prevState) => ({
+          ...prevState,
+          rows: [],
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching services:", error);
+    }
+  };
+
   useEffect(() => {
     getAllAppointments();
     getAllStaff();
     getAllPatient();
+    getAllServices();
   }, []);
 
   useEffect(() => {
@@ -280,13 +311,15 @@ function Default() {
     const transformedEvents = allAppointments?.map((appointment) => {
       debugger;
       // Combine the start_date with start_time and end_date with end_time
-      const start = new Date(`${appointment.start_date.split("T")[0]}T${appointment.start_time}`);
-      const end = new Date(`${appointment.end_date.split("T")[0]}T${appointment.end_time}`);
+      // const start = new Date(`${appointment.start_date.split("T")[0]}T${appointment.start_time}`);
+      // const end = new Date(`${appointment.end_date.split("T")[0]}T${appointment.end_time}`);
+      const start = new Date(appointment.start_date_time);
+      const end = new Date(appointment.end_date_time);
 
       // const start = appointment.start_time;
       // const end = appointment.end_time;
       return {
-        title: `${start} - ${end}`,
+        title: `${start.toLocaleString()} - ${end.toLocaleString()}`,
         start,
         end,
         allDay: false, // Set this based on your data if necessary
@@ -401,7 +434,7 @@ function Default() {
                             </ArgonTypography>
                             <ArgonSelect
                               variant="outlined"
-                              options={selectData.department}
+                              options={departmentOptions}
                               onChange={(e) => setDepartment(e.label)}
                             />
                           </Grid>
