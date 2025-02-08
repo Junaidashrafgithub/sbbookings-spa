@@ -72,6 +72,8 @@ function Default() {
     value: "",
     label: "",
   });
+  const [staffOptions, setStaffOptions] = useState([]);
+  const [patientOptions, setPateintOptions] = useState([]);
   const [departmentOptions, setDepartmentOptions] = useState([]);
   const [department, setDepartment] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -81,6 +83,7 @@ function Default() {
   const [isRecurring, setIsRecurring] = useState(true);
   const [allAppointments, setAllApointments] = useState([]);
   const [events, setEvents] = useState([]);
+  const [isAppointmentInvalid, setIsAppointmentInvalid] = useState(true);
 
   const localizer = momentLocalizer(moment);
   const formatTime = (date) => format(new Date(date), "HH:mm");
@@ -90,17 +93,9 @@ function Default() {
     label: "",
   });
 
-  const staffOptions = allStaff.map((staff) => ({
-    label: `${staff.name_first} ${staff.name_last}`, // Display the full name
-    value: staff.id, // Use the id or any unique value as the option's value
-  }));
-
   const [selectedPatient, setSelectedPatient] = useState([]);
 
-  const PatientOptions = allPatient.map((patient) => ({
-    label: `${patient.name_first} ${patient.name_last}`, // Display the full name
-    value: patient.id, // Use the id or any unique value as the option's value
-  }));
+  const entityTypes = ["doctor", "patient"];
 
   const handleOpenModal = () => {
     setSelectedPatient([]);
@@ -158,7 +153,7 @@ function Default() {
   };
 
   const handleIsrecurringChange = (e) => {
-    debugger;
+    // debugger;
     setIsRecurring(e.target.checked);
   };
 
@@ -166,7 +161,7 @@ function Default() {
   // console.log("isGroupSession: ", isGroupSession);
   // console.log("department: ", department);
   const handleIsGroupSessionChange = (selectedOption) => {
-    debugger;
+    // debugger;
     setIsGroupSession(selectedOption.value);
     if (isGroupSession === "no") {
       setSelectedPatient([]); // Reset selection when switching to single patient mode
@@ -248,9 +243,152 @@ function Default() {
       setAllApointments(result.data); // Ensure `result.data` exists before using it
     }
   };
+  // Helper Function: Check for Overlaps
+  const areDatesOverlapping = (start1, end1, start2, end2) => {
+    return start1 < end2 && end1 > start2;
+  };
+  // Helper function to validate and parse date and time
+  function parseDateTime(dateString, timeString) {
+    if (!dateString || !timeString) {
+      console.error("Invalid date or time input");
+      return null;
+    }
+
+    // Convert MM/DD/YYYY to ISO-compatible YYYY-MM-DD
+    const [month, day, year] = dateString.split("/");
+    const formattedDate = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+
+    // Create a new Date object and convert it to ISO string
+    const dateTime = new Date(`${formattedDate}T${timeString}`);
+
+    if (isNaN(dateTime)) {
+      console.error("Invalid date or time combination");
+      return null;
+    }
+
+    return dateTime.toISOString();
+  }
+
+  const filterFutureAppointments = (appointments) => {
+    const now = new Date();
+    return appointments.filter((appointment) => {
+      const appointmentStart = new Date(appointment.start_date_time);
+      return appointmentStart > now;
+    });
+  };
+
+  const getAvailableParticipants = (
+    allAppointments,
+    participants,
+    proposedStartDate,
+    proposedStartTime,
+    proposedEndDate,
+    proposedEndTime,
+    entityType
+  ) => {
+    // debugger;
+    const convertToISO = (date, time) => {
+      // Ensure the date is in "DD/MM/YYYY" format and time in "HH:mm:ss"
+      const [day, month, year] = date.split("/");
+      return new Date(`${year}-${month}-${day}T${time}`).toISOString();
+    };
+    // Parse proposed start and end date-time
+    const proposedStart = convertToISO(proposedStartDate, proposedStartTime);
+    const proposedEnd = convertToISO(proposedEndDate, proposedEndTime);
+
+    let availableParticipants = [];
+
+    switch (entityType) {
+      case "doctor":
+        availableParticipants = participants.filter((participant) => {
+          // Check if staff has no conflicting appointments
+          const hasConflict = allAppointments.some((appointment) => {
+            // const types1 = typeof appointment.doctor_id;
+            // const type2 = typeof participant.id;
+            // Match participant (doctor) ID
+            if (parseInt(appointment.doctor_id) === participant.id) {
+              const appointmentStartTime = appointment.start_date_time;
+              const appointmentEndTime = appointment.end_date_time;
+
+              // Check for overlapping time slots
+              return areDatesOverlapping(
+                proposedStart,
+                proposedEnd,
+                appointmentStartTime,
+                appointmentEndTime
+              );
+            }
+            return false;
+          });
+
+          // Return participant if no conflict
+          return !hasConflict;
+        });
+        break;
+
+      case "patient":
+        availableParticipants = participants.filter((participant) => {
+          // Check if staff has no conflicting appointments
+          const hasConflict = allAppointments.some((appointment) => {
+            // const types1 = typeof appointment.doctor_id;
+            // const type2 = typeof participant.id;
+            // Match participant (doctor) ID
+            if (parseInt(appointment.patient_id) === participant.id) {
+              const appointmentStartTime = appointment.start_date_time;
+              const appointmentEndTime = appointment.end_date_time;
+
+              // Check for overlapping time slots
+              return areDatesOverlapping(
+                proposedStart,
+                proposedEnd,
+                appointmentStartTime,
+                appointmentEndTime
+              );
+            }
+            return false;
+          });
+
+          // Return participant if no conflict
+          return !hasConflict;
+        });
+        break;
+
+      default:
+        console.log("Invalid entity type!");
+        break;
+    }
+
+    return availableParticipants;
+  };
+
+  // Function: Check Patient Availability
+  const checkPatientAvailability = (
+    allAppointments,
+    patientIds,
+    proposedStartDate,
+    proposedStartTime,
+    proposedEndDate,
+    proposedEndTime
+  ) => {
+    // Combine proposed start and end times into Date objects
+    const proposedStart = parseDateTime(proposedStartDate, proposedStartTime);
+    const proposedEnd = parseDateTime(proposedEndDate, proposedEndTime);
+
+    return !allAppointments.some((appointment) => {
+      const appointmentPatientIds = appointment.patients?.map((p) => p.id) || [];
+      const hasCommonPatient = patientIds.some((id) => appointmentPatientIds.includes(id));
+
+      if (!hasCommonPatient || appointment.status === "Canceled") return false;
+
+      const appointmentStart = new Date(appointment.start_date_time);
+      const appointmentEnd = new Date(appointment.end_date_time);
+
+      return areDatesOverlapping(proposedStart, proposedEnd, appointmentStart, appointmentEnd);
+    });
+  };
 
   const addNewAppointment = async () => {
-    //debugger;
+    // Prepare data for backend
     const data = {
       isRecurring: isRecurring,
       department: department,
@@ -263,13 +401,14 @@ function Default() {
       patient: selectedPatient,
     };
 
+    // Call backend to add the appointment
     let dbops = new dbOps();
     let result = await dbops.addNewAppointment(data);
-    debugger;
+
     if (result?.message === "SUCCESS") {
       setOpenModal(false);
       await showSuccessMessage("Appointment Created Successfully!");
-    } else {
+      getAllAppointments(); // Refresh the list
     }
   };
 
@@ -309,7 +448,7 @@ function Default() {
   useEffect(() => {
     // Transform the appointments into events for the calendar
     const transformedEvents = allAppointments?.map((appointment) => {
-      debugger;
+      // debugger;
       // Combine the start_date with start_time and end_date with end_time
       // const start = new Date(`${appointment.start_date.split("T")[0]}T${appointment.start_time}`);
       // const end = new Date(`${appointment.end_date.split("T")[0]}T${appointment.end_time}`);
@@ -329,6 +468,79 @@ function Default() {
 
     setEvents(transformedEvents);
   }, [allAppointments]);
+
+  useEffect(() => {
+    const handleValidRecipients = async () => {
+      if (!startDate || !startTime || !endDate || !endTime) return;
+      // const availableDoctorIds = await handleDoctorAvailability();
+      const futureAppointments = filterFutureAppointments(allAppointments);
+      const allStaffMinimal = allStaff.map(({ id, name_first, name_last }) => ({
+        id,
+        name_first,
+        name_last,
+      }));
+
+      const allPatientMinimal = allPatient.map(({ id, name_first, name_last }) => ({
+        id,
+        name_first,
+        name_last,
+      }));
+
+      const availableDoctors = getAvailableParticipants(
+        futureAppointments,
+        allStaffMinimal,
+        startDate,
+        startTime,
+        endDate,
+        endTime,
+        entityTypes[0]
+      );
+
+      const availablePatients = getAvailableParticipants(
+        futureAppointments,
+        allPatientMinimal,
+        startDate,
+        startTime,
+        endDate,
+        endTime,
+        entityTypes[1]
+      );
+
+      const updatedStaffOptions = availableDoctors.map((staff) => ({
+        label: `${staff.name_first} ${staff.name_last}`,
+        value: staff.id,
+      }));
+      const updatedPatientOptions = availablePatients.map((patient) => ({
+        label: `${patient.name_first} ${patient.name_last}`, // Display the full name
+        value: patient.id, // Use the id or any unique value as the option's value
+      }));
+      setStaffOptions(updatedStaffOptions);
+      setPateintOptions(updatedPatientOptions);
+    };
+
+    handleValidRecipients();
+    debugger;
+    // Ensure all required fields are valid based on the payload structure
+    const isDataComplete =
+      Boolean(startDate) &&
+      Boolean(startTime) &&
+      Boolean(endDate) &&
+      Boolean(endTime) &&
+      Boolean(department) &&
+      Boolean(selectedStaff?.value) &&
+      selectedPatient?.length > 0;
+
+    setIsAppointmentInvalid(!isDataComplete);
+  }, [
+    startDate,
+    startTime,
+    endDate,
+    endTime,
+    department,
+    isGroupSession,
+    selectedStaff,
+    selectedPatient,
+  ]);
 
   return (
     <DashboardLayout>
@@ -524,14 +736,14 @@ function Default() {
 
                             <ArgonSelect
                               variant="outlined"
-                              options={PatientOptions}
+                              options={patientOptions}
                               placeholder="Select Patient"
                               isMulti={isGroupSession ? true : false}
                               value={selectedPatient} // Ensure value is an array of IDs
                               renderValue={(selected) => (
                                 <ArgonBox sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
                                   {selected.map((value) => {
-                                    const patient = PatientOptions.find(
+                                    const patient = patientOptions.find(
                                       (option) => option.value === value
                                     );
                                     return (
@@ -551,7 +763,7 @@ function Default() {
                               )}
                               onChange={handlePatientChange} // Update selected patients
                             >
-                              {PatientOptions.map((option) => (
+                              {patientOptions.map((option) => (
                                 <MenuItem key={option.value} value={option.value}>
                                   {option.label}
                                 </MenuItem>
@@ -565,6 +777,7 @@ function Default() {
                           <ArgonButton
                             color="info"
                             onClick={addNewAppointment}
+                            disabled={isAppointmentInvalid}
                             sx={{
                               padding: "8px 16px", // Padding for the button
                               borderRadius: "8px", // Rounded corners
