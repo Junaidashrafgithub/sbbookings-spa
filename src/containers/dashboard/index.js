@@ -83,6 +83,7 @@ function Default() {
   const [isRecurring, setIsRecurring] = useState(true);
   const [allAppointments, setAllApointments] = useState([]);
   const [events, setEvents] = useState([]);
+  const [isDateRangeValid, setIsDateRangeValid] = useState(true);
   const [isAppointmentInvalid, setIsAppointmentInvalid] = useState(true);
 
   const localizer = momentLocalizer(moment);
@@ -112,6 +113,7 @@ function Default() {
       value: "",
       label: "",
     });
+    setIsDateRangeValid(true);
     setOpenModal(!openModal);
     if (!openModal) {
       getAllServices();
@@ -277,24 +279,22 @@ function Default() {
     });
   };
 
+  const convertToISO = (date, time) => {
+    // Ensure the date is in "DD/MM/YYYY" format and time in "HH:mm:ss"
+    const [day, month, year] = date.split("/");
+    return new Date(`${year}-${month}-${day}T${time}`).toISOString();
+  };
   const getAvailableParticipants = (
     allAppointments,
     participants,
-    proposedStartDate,
-    proposedStartTime,
-    proposedEndDate,
-    proposedEndTime,
+    proposedStart,
+    proposedEnd,
     entityType
   ) => {
     // debugger;
-    const convertToISO = (date, time) => {
-      // Ensure the date is in "DD/MM/YYYY" format and time in "HH:mm:ss"
-      const [day, month, year] = date.split("/");
-      return new Date(`${year}-${month}-${day}T${time}`).toISOString();
-    };
     // Parse proposed start and end date-time
-    const proposedStart = convertToISO(proposedStartDate, proposedStartTime);
-    const proposedEnd = convertToISO(proposedEndDate, proposedEndTime);
+    // const proposedStart = convertToISO(proposedStartDate, proposedStartTime);
+    // const proposedEnd = convertToISO(proposedEndDate, proposedEndTime);
 
     let availableParticipants = [];
 
@@ -359,32 +359,6 @@ function Default() {
     }
 
     return availableParticipants;
-  };
-
-  // Function: Check Patient Availability
-  const checkPatientAvailability = (
-    allAppointments,
-    patientIds,
-    proposedStartDate,
-    proposedStartTime,
-    proposedEndDate,
-    proposedEndTime
-  ) => {
-    // Combine proposed start and end times into Date objects
-    const proposedStart = parseDateTime(proposedStartDate, proposedStartTime);
-    const proposedEnd = parseDateTime(proposedEndDate, proposedEndTime);
-
-    return !allAppointments.some((appointment) => {
-      const appointmentPatientIds = appointment.patients?.map((p) => p.id) || [];
-      const hasCommonPatient = patientIds.some((id) => appointmentPatientIds.includes(id));
-
-      if (!hasCommonPatient || appointment.status === "Canceled") return false;
-
-      const appointmentStart = new Date(appointment.start_date_time);
-      const appointmentEnd = new Date(appointment.end_date_time);
-
-      return areDatesOverlapping(proposedStart, proposedEnd, appointmentStart, appointmentEnd);
-    });
   };
 
   const addNewAppointment = async () => {
@@ -471,8 +445,16 @@ function Default() {
 
   useEffect(() => {
     const handleValidRecipients = async () => {
+      debugger;
       if (!startDate || !startTime || !endDate || !endTime) return;
-      // const availableDoctorIds = await handleDoctorAvailability();
+      const startDateTime = convertToISO(startDate, startTime);
+      const endDateTime = convertToISO(endDate, endTime);
+      if (endDateTime <= startDateTime) {
+        setIsDateRangeValid(false);
+        return;
+      }
+
+      setIsDateRangeValid(true);
       const futureAppointments = filterFutureAppointments(allAppointments);
       const allStaffMinimal = allStaff.map(({ id, name_first, name_last }) => ({
         id,
@@ -489,20 +471,16 @@ function Default() {
       const availableDoctors = getAvailableParticipants(
         futureAppointments,
         allStaffMinimal,
-        startDate,
-        startTime,
-        endDate,
-        endTime,
+        startDateTime,
+        endDateTime,
         entityTypes[0]
       );
 
       const availablePatients = getAvailableParticipants(
         futureAppointments,
         allPatientMinimal,
-        startDate,
-        startTime,
-        endDate,
-        endTime,
+        startDateTime,
+        endDateTime,
         entityTypes[1]
       );
 
@@ -528,7 +506,8 @@ function Default() {
       Boolean(endTime) &&
       Boolean(department) &&
       Boolean(selectedStaff?.value) &&
-      selectedPatient?.length > 0;
+      selectedPatient?.length > 0 &&
+      isDateRangeValid;
 
     setIsAppointmentInvalid(!isDataComplete);
   }, [
@@ -540,6 +519,7 @@ function Default() {
     isGroupSession,
     selectedStaff,
     selectedPatient,
+    isDateRangeValid,
   ]);
 
   return (
@@ -711,6 +691,11 @@ function Default() {
                                   // paddingBottom: "20px", // Adjust bottom padding to ensure button visibility
                                 }}
                               />
+                              {!isDateRangeValid && (
+                                <ArgonTypography sx={{ fontSize: "0.675rem", color: "red" }}>
+                                  End date and time must be later than the start date and time.
+                                </ArgonTypography>
+                              )}
                             </ArgonBox>
                           </Grid>
 
