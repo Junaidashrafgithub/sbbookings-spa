@@ -50,6 +50,8 @@ import { FaCalendar } from "react-icons/fa";
 import selectData from "data/UserData";
 import { showSuccessMessage } from "util/alertUtil";
 import { format } from "date-fns";
+import { conflictAppointmentData } from "data/appointmentData";
+import ConflictPopover from "./components/ConflictPopover";
 
 const CustomToolbar = ({ handleOpenModal }) => {
   return (
@@ -93,7 +95,7 @@ function Default() {
     value: "",
     label: "",
   });
-
+  const [conflictAppointment, setConflictAppointment] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState([]);
 
   const entityTypes = ["doctor", "patient"];
@@ -362,7 +364,9 @@ function Default() {
   };
 
   const addNewAppointment = async () => {
+    // setConflictAppointment([]); // Reset the conflict appointment
     // Prepare data for backend
+    setConflictAppointment(conflictAppointmentData.conflicts); // Uncomment this to test the conflict appointment
     const data = {
       isRecurring: isRecurring,
       department: department,
@@ -383,6 +387,9 @@ function Default() {
       setOpenModal(false);
       await showSuccessMessage("Appointment Created Successfully!");
       getAllAppointments(); // Refresh the list
+    } else if (result?.message === "ERROR" && result.status === 409) {
+      setConflictAppointment(result.conflicts);
+      await showErrorMessage("Appointment Creation Failed!");
     }
   };
 
@@ -571,7 +578,9 @@ function Default() {
                   open={open}
                   onClose={handleOpenModal}
                   closeAfterTransition
-                  sx={{ zIndex: 1300 }} // Increase the zIndex here
+                  sx={{
+                    zIndex: 1300,
+                  }}
                 >
                   <Fade in={open}>
                     <ArgonBox
@@ -580,46 +589,78 @@ function Default() {
                         top: "50%",
                         left: "50%",
                         transform: "translate(-50%, -50%)",
-                        width: "100vw",
-                        height: "100vh",
+                        width: { xs: "95%", sm: "90%", md: "80%", lg: "70%" },
+                        maxHeight: { xs: "95vh", sm: "90vh" },
+                        overflow: "auto",
+                        p: { xs: 2, sm: 3, md: 4 },
+                        borderRadius: "12px",
                         bgcolor: "background.paper",
-                        boxShadow: 24,
-                        p: 4,
                       }}
                     >
                       <Card
                         sx={{
-                          padding: "20px",
+                          padding: { xs: "10px", sm: "15px", md: "20px" },
                           display: "flex",
-                          left: "20%",
-                          top: "10%",
-                          boxShadow: 15, // MUI shadow level 3 for subtle shadow (can also use custom values)
-                          maxWidth: "60%",
-                          height: "80%",
+                          flexDirection: "column",
                           border: "3px solid #344767",
-                          borderRadius: "8px", // Rounded corners for the card
-                          backgroundColor: "white", // Ensure the card has a white background
+                          borderRadius: "8px",
+                          backgroundColor: "white",
+                          height: "auto",
+                          minHeight: { xs: "80vh", sm: "auto" },
                         }}
                       >
-                        <ArgonBox sx={{ marginBottom: 5 }}>
+                        <ArgonBox sx={{ marginBottom: { xs: 2, sm: 3, md: 5 } }}>
                           <ArgonBox
                             sx={{
                               display: "flex",
-                              alignItems: "center",
+                              flexDirection: { xs: "column", sm: "row" },
+                              alignItems: { xs: "flex-start", sm: "center" },
                               justifyContent: "space-between",
+                              gap: { xs: 2, sm: 0 },
                             }}
                           >
-                            <ArgonTypography id="title" variant="h4">
+                            <ArgonTypography
+                              id="title"
+                              variant="h4"
+                              sx={{
+                                fontSize: { xs: "1.5rem", sm: "1.75rem", md: "2rem" },
+                              }}
+                            >
                               Add New Appointment
                             </ArgonTypography>
                             <FormControlLabel
                               control={<Switch defaultChecked onChange={handleIsrecurringChange} />}
-                              label="Recurring" // Visible label for the Switch
-                              labelPlacement="start" // Label is placed at the start (to the right of the switch)
+                              label="Recurring"
+                              labelPlacement="start"
                             />
                           </ArgonBox>
+
+                          <ArgonBox
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "start",
+                              gap: 2,
+                              marginTop: 2,
+                              flexWrap: "wrap",
+                            }}
+                          >
+                            <ConflictPopover conflicts={conflictAppointment} />
+                            {conflictAppointment.length > 0 && (
+                              <ArgonTypography
+                                sx={{
+                                  color: "red",
+                                  fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                                }}
+                                variant="p"
+                              >
+                                Conflict Appointment found!
+                              </ArgonTypography>
+                            )}
+                          </ArgonBox>
                         </ArgonBox>
-                        <Grid container spacing={2}>
+
+                        <Grid container spacing={{ xs: 1, sm: 2 }}>
                           <Grid item xs={12} sm={6} md={6} lg={6}>
                             <ArgonTypography sx={{ fontSize: "0.875rem" }}>
                               Department:
@@ -756,16 +797,24 @@ function Default() {
                             </ArgonSelect>
                           </Grid>
                         </Grid>
+
                         <ArgonBox
-                          sx={{ marginTop: 1, display: "flex", justifyContent: "flex-end", gap: 2 }}
+                          sx={{
+                            marginTop: { xs: 2, sm: 3 },
+                            display: "flex",
+                            justifyContent: "flex-end",
+                            gap: { xs: 1, sm: 2 },
+                            flexWrap: "wrap",
+                          }}
                         >
                           <ArgonButton
                             color="info"
                             onClick={addNewAppointment}
                             disabled={isAppointmentInvalid}
                             sx={{
-                              padding: "8px 16px", // Padding for the button
-                              borderRadius: "8px", // Rounded corners
+                              padding: { xs: "6px 12px", sm: "8px 16px" },
+                              borderRadius: "8px",
+                              fontSize: { xs: "0.875rem", sm: "1rem" },
                             }}
                           >
                             Add
@@ -773,12 +822,13 @@ function Default() {
                           <ArgonButton
                             onClick={handleOpenModal}
                             sx={{
-                              backgroundColor: "secondary.main", // Use theme's secondary color
+                              backgroundColor: "secondary.main",
                               color: "white",
-                              padding: "8px 16px",
+                              padding: { xs: "6px 12px", sm: "8px 16px" },
                               borderRadius: "8px",
+                              fontSize: { xs: "0.875rem", sm: "1rem" },
                               "&:hover": {
-                                backgroundColor: "secondary.dark", // Darker shade on hover
+                                backgroundColor: "secondary.dark",
                               },
                             }}
                           >
