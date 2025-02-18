@@ -364,9 +364,9 @@ function Default() {
   };
 
   const addNewAppointment = async () => {
-    // setConflictAppointment([]); // Reset the conflict appointment
+    setConflictAppointment([]); // Reset the conflict appointment
     // Prepare data for backend
-    setConflictAppointment(conflictAppointmentData.conflicts); // Uncomment this to test the conflict appointment
+    // setConflictAppointment(conflictAppointmentData.conflicts); // Uncomment this to test the conflict appointment
     const data = {
       isRecurring: isRecurring,
       department: department,
