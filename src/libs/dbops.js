@@ -192,4 +192,41 @@ export default class dbOps {
   async deleteService(data) {
     return await this.postRequest("service/delete-service", data);
   }
+
+  // Reports
+  async getServiceUsageReport(data) {
+    return await this.postRequest(
+      "report/service-usage",
+      data,
+      "could not generate service usage report",
+      errorMsgAdmin
+    );
+  }
+
+  async getStaffPerformanceReport(data) {
+    return await this.postRequest(
+      "report/staff-performance",
+      data,
+      "could not generate staff performance report",
+      errorMsgAdmin
+    );
+  }
+
+  async getCustomerServiceUsageReport(data) {
+    return await this.postRequest(
+      "report/customer-service-usage",
+      data,
+      "could not generate customer service usage report",
+      errorMsgAdmin
+    );
+  }
+
+  async getSystemPerformanceReport(data) {
+    return await this.postRequest(
+      "report/system-performance",
+      data,
+      "could not generate system performance report",
+      errorMsgAdmin
+    );
+  }
 }
